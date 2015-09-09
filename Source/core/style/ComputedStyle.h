@@ -166,6 +166,8 @@ protected:
                 && (_visibility == other._visibility)
                 && (_text_align == other._text_align)
                 && (_text_transform == other._text_transform)
+                && (_typo_hanging_punctuation == other._typo_hanging_punctuation)
+                && (_typo_hyphens == other._typo_hyphens)
                 && (m_textUnderline == other.m_textUnderline)
                 && (_cursor_style == other._cursor_style)
                 && (_direction == other._direction)
@@ -188,6 +190,8 @@ protected:
         unsigned _visibility : 2; // EVisibility
         unsigned _text_align : 4; // ETextAlign
         unsigned _text_transform : 2; // ETextTransform
+        unsigned _typo_hanging_punctuation : 1; // ETypoHangingPunctuation
+        unsigned _typo_hyphens : 1; // ETypoHyphens
         unsigned m_textUnderline : 1;
         unsigned _cursor_style : 6; // ECursor
         unsigned _direction : 1; // TextDirection
@@ -301,6 +305,8 @@ protected:
         inherited_flags._pointerEvents = initialPointerEvents();
         inherited_flags._insideLink = NotInsideLink;
         inherited_flags.m_writingMode = initialWritingMode();
+        inherited_flags._typo_hanging_punctuation = initialTypoHangingPunctuation();
+        inherited_flags._typo_hyphens = initialTypoHyphens();
 
         noninherited_flags.effectiveDisplay = noninherited_flags.originalDisplay = initialDisplay();
         noninherited_flags.overflowX = initialOverflowX();
@@ -1514,6 +1520,12 @@ public:
     bool borderObscuresBackground() const;
     void getBorderEdgeInfo(BorderEdge edges[], bool includeLogicalLeftEdge = true, bool includeLogicalRightEdge = true) const;
 
+    // Typo properties
+    ETypoHangingPunctuation typoHangingPunctuation() const { return static_cast<ETypoHangingPunctuation>(inherited_flags._typo_hanging_punctuation); }
+    ETypoHyphens typoHyphens() const { return static_cast<ETypoHyphens>(inherited_flags._typo_hyphens); }
+    void setTypoHangingPunctuation(ETypoHangingPunctuation value) { inherited_flags._typo_hanging_punctuation = value; }
+    void setTypoHyphens(ETypoHyphens value) { inherited_flags._typo_hyphens = value; }
+
     // Initial values for all the properties
     static EBorderCollapse initialBorderCollapse() { return BSEPARATE; }
     static EBorderStyle initialBorderStyle() { return BNONE; }
@@ -1693,6 +1705,10 @@ public:
 #endif
     static WebBlendMode initialBlendMode() { return WebBlendModeNormal; }
     static EIsolation initialIsolation() { return IsolationAuto; }
+
+    // Typo properties
+    static ETypoHangingPunctuation initialTypoHangingPunctuation() { return TypoHangingPunctuationOff; }
+    static ETypoHyphens initialTypoHyphens() { return TypoHyphensOff; }
 private:
     void setVisitedLinkColor(const Color&);
     void setVisitedLinkBackgroundColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBackgroundColor, v); }

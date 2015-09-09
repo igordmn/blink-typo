@@ -4719,6 +4719,60 @@ template<> inline CSSPrimitiveValue::operator ScrollBehavior() const
     return ScrollBehaviorAuto;
 }
 
+template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETypoHangingPunctuation e)
+    : CSSValue(PrimitiveClass)
+{
+    m_primitiveUnitType = CSS_VALUE_ID;
+    switch (e) {
+    case TypoHangingPunctuationOff:
+        m_value.valueID = CSSValueOff;
+        break;
+    case TypoHangingPunctuationOn:
+        m_value.valueID = CSSValueOn;
+        break;
+    }
+}
+
+template<> inline CSSPrimitiveValue::operator ETypoHangingPunctuation() const
+{
+    ASSERT(isValueID());
+    switch (m_value.valueID) {
+    case CSSValueOff:
+        return TypoHangingPunctuationOff;
+    case CSSValueOn:
+        return TypoHangingPunctuationOn;
+    default:
+        return TypoHangingPunctuationOff;
+    }
+}
+
+template<> inline CSSPrimitiveValue::CSSPrimitiveValue(ETypoHyphens e)
+    : CSSValue(PrimitiveClass)
+{
+    m_primitiveUnitType = CSS_VALUE_ID;
+    switch (e) {
+    case TypoHyphensOff:
+        m_value.valueID = CSSValueOff;
+        break;
+    case TypoHyphensOn:
+        m_value.valueID = CSSValueOn;
+        break;
+    }
+}
+
+template<> inline CSSPrimitiveValue::operator ETypoHyphens() const
+{
+    ASSERT(isValueID());
+    switch (m_value.valueID) {
+    case CSSValueOff:
+        return TypoHyphensOff;
+    case CSSValueOn:
+        return TypoHyphensOn;
+    default:
+        return TypoHyphensOff;
+    }
+}
+
 } // namespace blink
 
 #endif

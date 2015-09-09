@@ -496,6 +496,8 @@ int UseCounter::mapCSSPropertyIdToCSSSampleIdForHistogram(int id)
     case CSSPropertyMotion: return 460;
     case CSSPropertyX: return 461;
     case CSSPropertyY: return 462;
+    case CSSPropertyTypoHangingPunctuation: return 0;
+    case CSSPropertyTypoHyphens: return 0;
     case CSSPropertyRx: return 463;
     case CSSPropertyRy: return 464;
     case CSSPropertyFontSizeAdjust: return 465;

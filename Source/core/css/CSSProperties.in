@@ -527,6 +527,8 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 -webkit-shape-image-threshold alias_for=shape-image-threshold
 -webkit-shape-margin alias_for=shape-margin
 -webkit-shape-outside alias_for=shape-outside
+-typo-hanging-punctuation inherited
+-typo-hyphens inherited
 -webkit-transform alias_for=transform
 -webkit-transform-origin alias_for=transform-origin
 -webkit-transform-style alias_for=transform-style

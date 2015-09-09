@@ -41,6 +41,7 @@
 #include "core/layout/svg/LayoutSVGInlineText.h"
 #include "core/paint/DeprecatedPaintLayer.h"
 #include "platform/text/TextBreakIterator.h"
+#include "public/platform/Platform.h"
 
 namespace blink {
 
@@ -108,6 +109,7 @@ public:
 
 private:
     void skipTrailingWhitespace(InlineIterator&, const LineInfo&);
+    void applyTypoHyphens(WordMeasurement& wordMeasurement, float wordSpacingForWordMeasurement, bool isFirstWord, bool& hyphenated);
 
     InlineBidiResolver& m_resolver;
 
@@ -562,6 +564,12 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
         keepAll = false;
     }
 
+    bool isFirstWord = !m_width.committedWidth();
+    if (m_currentStyle->typoHyphens() == TypoHyphensOn) {
+        breakWords = false;
+        breakAll = false;
+    }
+
     if (layoutText->isWordBreak()) {
         m_width.commit();
         m_lineBreak.moveToStartOf(m_current.object());
@@ -695,6 +703,7 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                     }
                     // Didn't fit. Jump to the end unless there's still an opportunity to collapse whitespace.
                     if (m_ignoringSpaces || !m_collapseWhiteSpace || !m_currentCharacterIsSpace || !previousCharacterIsSpace) {
+                        applyTypoHyphens(wordMeasurement, wordSpacingForWordMeasurement, isFirstWord, hyphenated);
                         m_atEnd = true;
                         return false;
                     }
@@ -725,6 +734,7 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                 // Auto-wrapping text should not wrap in the middle of a word once it has had an
                 // opportunity to break after a word.
                 breakWords = false;
+                isFirstWord = false;
             }
 
             if (midWordBreak && !U16_IS_TRAIL(c) && !(WTF::Unicode::category(c) & (WTF::Unicode::Mark_NonSpacing | WTF::Unicode::Mark_Enclosing | WTF::Unicode::Mark_SpacingCombining))) {
@@ -820,8 +830,58 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
             hyphenated = true;
             m_atEnd = true;
         }
+        applyTypoHyphens(wordMeasurement, wordSpacingForWordMeasurement, isFirstWord, hyphenated);
     }
     return false;
+}
+
+inline void BreakingContext::applyTypoHyphens(
+        WordMeasurement& wordMeasurement, float wordSpacingForWordMeasurement, bool isFirstWord,
+        bool& hyphenated) {
+    bool isWbr = m_lineBreak.object()->isText() && toLayoutText(m_lineBreak.object())->isWordBreak();
+    bool isSoftHyphen = m_lineBreak.previousInSameNode() == softHyphenCharacter;
+    bool isLineBrokeCleanly = m_lineInfo.previousLineBrokeCleanly();
+
+    if (m_currentStyle->typoHyphens() == TypoHyphensOn && m_autoWrap && !isLineBrokeCleanly && !isSoftHyphen && !isWbr) {
+        LayoutText* layoutText = wordMeasurement.layoutText;
+        const ComputedStyle& style = layoutText->styleRef(m_lineInfo.isFirstLine());
+        const Font& font = style.font();
+
+        int minBreakIndex = wordMeasurement.startOffset;
+        int maxBreakIndex = wordMeasurement.startOffset;
+
+        float wordWidth = wordMeasurement.width - wordSpacingForWordMeasurement;
+        float hyphenWidth = measureHyphenWidth(layoutText, font, textDirectionFromUnicode(m_resolver.position().direction()));
+        float xPos = m_width.currentWidth() - wordWidth;
+        float availableWidth = m_width.availableWidth() - hyphenWidth;
+        for (int i = wordMeasurement.startOffset; i < wordMeasurement.endOffset; i++) {
+            xPos += textWidth(layoutText, i, 1, font, xPos, m_collapseWhiteSpace, &wordMeasurement.fallbackFonts);
+
+            if (xPos > availableWidth) {
+                maxBreakIndex = i;
+                break;
+            }
+        }
+
+        ASSERT(Platform::current()->typoExtensions());
+        TypoHyphenator& typoHyphenator = Platform::current()->typoExtensions()->hyphenator();
+        int breakIndex = typoHyphenator.hyphenateText(WebString(style.locale()),
+                WebString(layoutText->text()), wordMeasurement.startOffset, wordMeasurement.endOffset,
+                minBreakIndex, maxBreakIndex);
+
+        if (breakIndex < 0 && isFirstWord) {
+            breakIndex =
+                    maxBreakIndex > wordMeasurement.startOffset ? maxBreakIndex :
+                    wordMeasurement.startOffset + 1 < wordMeasurement.endOffset ? wordMeasurement.startOffset + 1 :
+                            -1;
+        }
+
+        if (breakIndex >= 0) {
+            m_lineBreak.moveTo(m_current.object(), breakIndex, m_current.nextBreakablePosition());
+            hyphenated = true;
+            m_atEnd = true;
+        }
+    }
 }
 
 inline void BreakingContext::commitAndUpdateLineBreakIfNeeded()

@@ -561,6 +561,9 @@ enum TextIndentType { TextIndentNormal, TextIndentHanging };
 
 enum CSSBoxType { BoxMissing = 0, MarginBox, BorderBox, PaddingBox, ContentBox };
 
+enum ETypoHangingPunctuation { TypoHangingPunctuationOff, TypoHangingPunctuationOn };
+enum ETypoHyphens { TypoHyphensOff, TypoHyphensOn };
+
 } // namespace blink
 
 #endif // ComputedStyleConstants_h

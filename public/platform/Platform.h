@@ -53,6 +53,7 @@
 #include "WebString.h"
 #include "WebURLError.h"
 #include "WebVector.h"
+#include "TypoExtensions.h"
 
 #include <vector>
 
@@ -710,6 +711,10 @@ public:
     // Background Sync API------------------------------------------------------------
 
     virtual WebSyncProvider* backgroundSyncProvider() { return 0; }
+
+    // Typo ---------------------------------------------------------------
+
+    virtual TypoExtensions* typoExtensions() { return 0; };
 
 protected:
     BLINK_PLATFORM_EXPORT Platform();

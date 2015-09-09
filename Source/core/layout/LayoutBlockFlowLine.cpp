@@ -41,6 +41,7 @@
 #include "core/layout/svg/line/SVGRootInlineBox.h"
 #include "platform/fonts/Character.h"
 #include "platform/text/BidiResolver.h"
+#include "public/platform/Platform.h"
 #include "wtf/RefCountedLeakCounter.h"
 #include "wtf/StdLibExtras.h"
 #include "wtf/Vector.h"
@@ -572,11 +573,112 @@ void LayoutBlockFlow::computeInlineDirectionPositionsForLine(RootInlineBox* line
         updateLogicalInlinePositions(this, lineLogicalLeft, lineLogicalRight, availableLogicalWidth, isFirstLine, shouldIndentText, layoutBox->logicalHeight());
     }
 
+    applyHangingPunctuation(lineInfo, firstRun, lineLogicalLeft, lineLogicalRight, availableLogicalWidth);
+
     computeInlineDirectionPositionsForSegment(lineBox, lineInfo, textAlign, lineLogicalLeft, availableLogicalWidth, firstRun, trailingSpaceRun, textBoxDataMap, verticalPositionCache, wordMeasurements);
     // The widths of all runs are now known. We can now place every inline box (and
     // compute accurate widths for the inline flow boxes).
     needsWordSpacing = lineBox->isLeftToRightDirection() ? false: true;
     lineBox->placeBoxesInInlineDirection(lineLogicalLeft, needsWordSpacing);
+}
+
+void LayoutBlockFlow::applyHangingPunctuation(const LineInfo& lineInfo, BidiRun* firstRun,
+		float& lineLogicalLeft, float&lineLogicalRight, float& availableLogicalWidth)
+{
+    if (styleRef().typoHangingPunctuation() == TypoHangingPunctuationOn) {
+        struct CharInfo {
+            UChar ch;
+            LayoutObject* layoutObject = 0;
+
+            inline float width(bool isFirstLine) {
+            	const ComputedStyle* style = layoutObject->style(isFirstLine);
+                const Font& font = style->font();
+                return font.width(constructTextRun(layoutObject, font, &ch, 1, *style, style->direction()));
+            }
+        };
+
+        struct FirstLastSymbol {
+            CharInfo first;
+            CharInfo last;
+            bool firstFound = false;
+            bool lastFound = false;
+
+            // находим первый символ, перед которым нет видимых пробелов и нетекстовых объектов.
+            // находим последний символ, после которого нет видимых пробелов и нетекстовых объектов.
+            inline void find(const LineInfo& lineInfo, BidiRun* firstRun) {
+                static const UChar OBJECT_REPLACEMENT_CHARACTER = 0xFFFC;
+
+                for (BidiRun* run = firstRun; run; run = run->next()) {
+                    LayoutObject*  object = run->object();
+                    if (object->isText()) {
+                        LayoutText* layoutText = toLayoutText(object);
+                        if (layoutText->style()->collapseWhiteSpace()) {
+                            for (int i = run->start(); i < run->stop(); i++) {
+                                UChar ch = layoutText->characterAt(i);
+                                if (!Character::treatAsSpace(ch)) {
+                                    processSymbol(ch, layoutText);
+                                }
+                                if (run->m_hasHyphen && i == run->stop() - 1) {
+                                    UChar hyphenSymbol = getHyphenSymbol(layoutText, lineInfo);
+                                    if (hyphenSymbol) {
+                                        processSymbol(hyphenSymbol, layoutText);
+                                    }
+                                }
+                            }
+                        } else if (run->stop() - run->start() > 0) {
+                            processSymbol(OBJECT_REPLACEMENT_CHARACTER, layoutText);
+                        }
+                    } else if (!run->object()->isLayoutInline()) {
+                        processSymbol(OBJECT_REPLACEMENT_CHARACTER, object);
+                    }
+                }
+                if (first.ch == OBJECT_REPLACEMENT_CHARACTER) {
+                    firstFound = false;
+                }
+                if (last.ch == OBJECT_REPLACEMENT_CHARACTER) {
+                    lastFound = false;
+                }
+            }
+
+            inline void processSymbol(UChar ch, LayoutObject* layoutObject) {
+                if (!firstFound) {
+                    first.ch = ch;
+                    first.layoutObject = layoutObject;
+                    firstFound = true;
+                }
+                last.ch = ch;
+                last.layoutObject = layoutObject;
+                lastFound = true;
+            }
+
+            inline UChar getHyphenSymbol(LayoutObject* layoutObject, const LineInfo& lineInfo) {
+            	const ComputedStyle* style = layoutObject->style(lineInfo.isFirstLine());
+                const WTF::String& hyphenStr = style->hyphenString().string();
+                unsigned int length = hyphenStr.length();
+                return length > 0 ? hyphenStr[length - 1] : 0;
+            }
+        };
+
+        FirstLastSymbol firstLastSymbol;
+        firstLastSymbol.find(lineInfo, firstRun);
+
+        ASSERT(Platform::current()->typoExtensions());
+        TypoHangingPunctuation& typoHangingPunctuation = Platform::current()->typoExtensions()->hangingPunctuation();
+
+        if (firstLastSymbol.firstFound) {
+            float width = firstLastSymbol.first.width(lineInfo.isFirstLine());
+            float hangFactor = typoHangingPunctuation.startHangFactor(firstLastSymbol.first.ch);
+            lineLogicalLeft -= hangFactor * width;
+        }
+
+        if (firstLastSymbol.lastFound) {
+            float width = firstLastSymbol.last.width(lineInfo.isFirstLine());
+            float hangFactor = typoHangingPunctuation.endHangFactor(firstLastSymbol.last.ch);
+            lineLogicalRight += hangFactor * width;
+        }
+
+        availableLogicalWidth = lineLogicalRight - lineLogicalLeft;
+    }
 }
 
 BidiRun* LayoutBlockFlow::computeInlineDirectionPositionsForSegment(RootInlineBox* lineBox, const LineInfo& lineInfo, ETextAlign textAlign, float& logicalLeft,

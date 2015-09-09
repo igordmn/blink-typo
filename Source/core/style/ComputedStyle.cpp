@@ -563,6 +563,8 @@ bool ComputedStyle::diffNeedsFullLayoutAndPaintInvalidation(const ComputedStyle&
         || inherited_flags.m_rtlOrdering != other.inherited_flags.m_rtlOrdering
         || inherited_flags._text_align != other.inherited_flags._text_align
         || inherited_flags._text_transform != other.inherited_flags._text_transform
+        || inherited_flags._typo_hanging_punctuation != other.inherited_flags._typo_hanging_punctuation
+        || inherited_flags._typo_hyphens != other.inherited_flags._typo_hyphens
         || inherited_flags._direction != other.inherited_flags._direction
         || inherited_flags._white_space != other.inherited_flags._white_space
         || inherited_flags.m_writingMode != other.inherited_flags.m_writingMode)
