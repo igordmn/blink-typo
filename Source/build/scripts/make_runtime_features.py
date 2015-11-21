@@ -50,6 +50,7 @@ class RuntimeFeatureWriter(in_generator.Writer):
         'depends_on' : [],
         'custom': False,
         'status': None,
+        'typo_enabled': False,
     }
 
     _status_aliases = {

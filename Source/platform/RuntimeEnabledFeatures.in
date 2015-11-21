@@ -35,11 +35,11 @@ CompositorWorker status=experimental
 CompositorAnimationTimelines
 ContextMenu status=experimental
 CredentialManager status=test
-CSS3Text status=experimental
-CSS3TextDecorations status=experimental
+CSS3Text status=experimental, typo_enabled=true
+CSS3TextDecorations status=experimental, typo_enabled=true
 CSSAttributeCaseSensitivity status=experimental
 CSSCompositing status=stable
-CSSFontSizeAdjust status=experimental
+CSSFontSizeAdjust status=experimental, typo_enabled=true
 CSSGridLayout status=experimental
 CSSMaskSourceType status=experimental
 CSSMotionPath status=experimental
@@ -96,7 +96,7 @@ NavigatorConnect status=experimental
 NavigatorContentUtils
 NetworkInformation status=stable
 // CSS parser based on the css-syntax spec. crbug.com/330389
-NewCSSParser status=stable
+NewCSSParser status=stable, typo_enabled=true
 NotificationConstructor status=stable
 NotificationExperimental status=test
 Notifications status=stable
@@ -123,7 +123,7 @@ PushMessaging status=stable
 PushMessagingData status=test
 QuotaPromise status=experimental
 ReducedReferrerGranularity
-RegionBasedColumns status=experimental
+RegionBasedColumns status=experimental, typo_enabled=true
 RequestAutocomplete status=test
 ScreenOrientation status=stable
 ScriptedSpeech status=stable
