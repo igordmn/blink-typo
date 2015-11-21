@@ -88,13 +88,13 @@ FontPlatformData FontCustomPlatformData::fontPlatformData(float size, bool bold,
 PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* buffer)
 {
     ASSERT_ARG(buffer, buffer);
-
+/*  // This is for security. For book reader it is harmful. So disable it.
     OpenTypeSanitizer sanitizer(buffer);
     RefPtr<SharedBuffer> transcodeBuffer = sanitizer.sanitize();
     if (!transcodeBuffer)
         return nullptr; // validation failed.
     buffer = transcodeBuffer.get();
-
+*/
     SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData().get());
 #if OS(WIN)
     RefPtr<SkTypeface> typeface = adoptRef(FontCache::fontCache()->fontManager()->createFromStream(stream));
