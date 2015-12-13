@@ -3479,6 +3479,25 @@ bool Element::supportsStyleSharing() const
     return true;
 }
 
+ClientRectList* Element::typoGetLineRects() {
+	Vector<FloatQuad> quads;
+	document().updateLayoutIgnorePendingStylesheets();
+
+	LayoutObject* object = layoutObject();
+	if (object) {
+		LayoutBlock::iterateTypoLines(object, [&] (InlineFlowBox* box) {
+			RootInlineBox& root = box->root();
+			LayoutRect logicalRect(root.logicalLeft(), root.lineTop(), root.logicalWidth(), root.lineBottom() - root.lineTop());
+			FloatQuad localQuad = FloatQuad(root.logicalRectToPhysicalRect(logicalRect));
+			FloatQuad absoluteQuad = root.layoutObject().localToAbsoluteQuad(localQuad);
+			quads.append(absoluteQuad);
+		});
+		document().adjustFloatQuadsForScrollAndAbsoluteZoom(quads, *object);
+	}
+
+	return ClientRectList::create(quads);
+}
+
 DEFINE_TRACE(Element)
 {
 #if ENABLE(OILPAN)

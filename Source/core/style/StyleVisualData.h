@@ -43,7 +43,8 @@ public:
     {
         return clip == o.clip
             && hasAutoClip == o.hasAutoClip
-            && textDecoration == o.textDecoration
+            && typoHiddenLinesTop == o.typoHiddenLinesTop
+            && typoHiddenLinesBottom == o.typoHiddenLinesBottom
             && m_zoom == o.m_zoom;
     }
     bool operator!=(const StyleVisualData& o) const { return !(*this == o); }
@@ -51,6 +52,9 @@ public:
     LengthBox clip;
     bool hasAutoClip : 1;
     unsigned textDecoration : TextDecorationBits; // Text decorations defined *only* by this element.
+
+    unsigned typoHiddenLinesTop;
+    unsigned typoHiddenLinesBottom;
 
     float m_zoom;
 

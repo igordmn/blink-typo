@@ -2585,6 +2585,10 @@ PassRefPtrWillBeRawPtr<CSSValue> ComputedStyleCSSValueMapping::get(CSSPropertyID
         return cssValuePool().createValue(style.typoHangingPunctuation());
     case CSSPropertyTypoHyphens:
         return cssValuePool().createValue(style.typoHyphens());
+    case CSSPropertyTypoHiddenLinesTop:
+        return cssValuePool().createValue(style.typoHiddenLinesTop(), CSSPrimitiveValue::CSS_NUMBER);
+    case CSSPropertyTypoHiddenLinesBottom:
+        return cssValuePool().createValue(style.typoHiddenLinesBottom(), CSSPrimitiveValue::CSS_NUMBER);
     default:
         break;
     }

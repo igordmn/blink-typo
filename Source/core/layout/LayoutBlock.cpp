@@ -82,7 +82,7 @@ struct SameSizeAsLayoutBlock : public LayoutBox {
     LayoutObjectChildList children;
     LineBoxList lineBoxes;
     int pageLogicalOffset;
-    uint32_t bitfields;
+    uint32_t bitfields : 9;
 };
 
 static_assert(sizeof(LayoutBlock) == sizeof(SameSizeAsLayoutBlock), "LayoutBlock should stay small");
@@ -154,6 +154,8 @@ LayoutBlock::LayoutBlock(ContainerNode* node)
     , m_widthAvailableToChildrenChanged(false)
     , m_hasOnlySelfCollapsingChildren(false)
     , m_descendantsWithFloatsMarkedForLayout(false)
+	, m_hasHiddenLines(false)
+	, m_shouldInvalidateTypoLinesVisibility(false)
 {
     // LayoutBlockFlow calls setChildrenInline(true).
     // By default, subclasses do not have inline children.
@@ -306,6 +308,13 @@ void LayoutBlock::styleWillChange(StyleDifference diff, const ComputedStyle& new
         }
     }
 
+    if (oldStyle) {
+        if (oldStyle->typoHiddenLinesTop() != newStyle.typoHiddenLinesTop() ||
+        		oldStyle->typoHiddenLinesBottom() != newStyle.typoHiddenLinesBottom()) {
+        	m_shouldInvalidateTypoLinesVisibility = true;
+        }
+    }
+
     LayoutBox::styleWillChange(diff, newStyle);
 }
 
@@ -360,6 +369,39 @@ void LayoutBlock::styleDidChange(StyleDifference diff, const ComputedStyle* oldS
         ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->removeLayoutObject(this);
     else
         ResourceLoadPriorityOptimizer::resourceLoadPriorityOptimizer()->addLayoutObject(this);
+}
+
+void LayoutBlock::invalidateTreeIfNeeded(PaintInvalidationState& paintInvalidationState) {
+	invalidateTypoLinesVisibility();
+	LayoutBox::invalidateTreeIfNeeded(paintInvalidationState);
+}
+
+void LayoutBlock::invalidateTypoLinesVisibility() {
+	if (m_shouldInvalidateTypoLinesVisibility) {
+		m_shouldInvalidateTypoLinesVisibility = false;
+
+		const ComputedStyle& style = styleRef();
+		unsigned onTop = style.typoHiddenLinesTop();
+		unsigned onBottom = style.typoHiddenLinesBottom();
+		bool willHasHideLines = onTop > 0 || onBottom > 0;
+
+		if (m_hasHiddenLines || (!m_hasHiddenLines && willHasHideLines)) {
+			m_hasHiddenLines = willHasHideLines;
+
+			unsigned length = 0;
+			iterateTypoLines(this, [&] (InlineFlowBox* box){
+				length++;
+			});
+
+			unsigned visibleBegin = onTop;
+			unsigned visibleEnd = onBottom <= length ? length - onBottom : 0;
+			unsigned i = 0;
+			iterateTypoLines(this, [&i, &visibleBegin, &visibleEnd] (InlineFlowBox* box){
+				box->root().setVisible(i >= visibleBegin && i < visibleEnd);
+				i++;
+			});
+		}
+	}
 }
 
 void LayoutBlock::invalidatePaintOfSubtreesIfNeeded(PaintInvalidationState& childPaintInvalidationState)
@@ -1383,6 +1425,8 @@ void LayoutBlock::layout()
         clearLayoutOverflow();
 
     invalidateBackgroundObscurationStatus();
+
+    m_shouldInvalidateTypoLinesVisibility = true;
 }
 
 bool LayoutBlock::updateImageLoadingPriorities()

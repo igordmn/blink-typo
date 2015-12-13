@@ -529,6 +529,8 @@ transition longhands=transition-property;transition-duration;transition-timing-f
 -webkit-shape-outside alias_for=shape-outside
 -typo-hanging-punctuation inherited
 -typo-hyphens inherited
+-typo-hidden-lines-top converter=convertNumberOrPercentage
+-typo-hidden-lines-bottom converter=convertNumberOrPercentage
 -webkit-transform alias_for=transform
 -webkit-transform-origin alias_for=transform-origin
 -webkit-transform-style alias_for=transform-style

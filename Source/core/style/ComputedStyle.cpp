@@ -712,6 +712,11 @@ bool ComputedStyle::diffNeedsPaintInvalidationObject(const ComputedStyle& other)
     if (resize() != other.resize())
         return true;
 
+    if (visual->typoHiddenLinesTop != other.visual->typoHiddenLinesTop
+    		|| visual->typoHiddenLinesBottom != other.visual->typoHiddenLinesBottom) {
+    	return true;
+    }
+
     return false;
 }
 

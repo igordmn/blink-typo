@@ -144,6 +144,9 @@
     [RuntimeEnabled=Touch] attribute EventHandler ontouchmove;
     [RuntimeEnabled=Touch] attribute EventHandler ontouchstart;
     attribute EventHandler onwheel;
+
+    // Typo
+    ClientRectList typoGetLineRects();
 };
 
 Element implements ParentNode;

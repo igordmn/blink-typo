@@ -607,6 +607,7 @@ PositionWithAffinity LayoutText::positionForPoint(const LayoutPoint& point)
             box = box->nextTextBox();
 
         RootInlineBox& rootBox = box->root();
+        if (!rootBox.isVisible()) continue;
         LayoutUnit top = std::min(rootBox.selectionTop(), rootBox.lineTop());
         if (pointBlockDirection > top || (!blocksAreFlipped && pointBlockDirection == top)) {
             LayoutUnit bottom = rootBox.selectionBottom();

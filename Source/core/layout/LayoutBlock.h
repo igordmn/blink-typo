@@ -324,6 +324,8 @@ protected:
 
     virtual bool isInlineBlockOrInlineTable() const override final { return isInline() && isReplaced(); }
 
+    virtual void invalidateTreeIfNeeded(PaintInvalidationState& paintInvalidationState) override;
+
     virtual void invalidatePaintOfSubtreesIfNeeded(PaintInvalidationState& childPaintInvalidationState) override;
 
 private:
@@ -475,6 +477,37 @@ protected:
     // FIXME: This is temporary as we move code that accesses block flow
     // member variables out of LayoutBlock and into LayoutBlockFlow.
     friend class LayoutBlockFlow;
+
+public:
+    template<typename F>
+    static void iterateTypoLines(LayoutObject* object, F lambda) {
+    	if (object->isLayoutBlock()) {
+			auto block = static_cast<LayoutBlock*>(object);
+			auto lineBoxes = block->lineBoxes();
+			for (InlineFlowBox* box = lineBoxes->firstLineBox(); box; box = box->nextLineBox()) {
+				lambda(box);
+			}
+		}
+    	iterateAnonymousTypoLines(object, lambda);
+    }
+
+private:
+    template<typename F>
+	static void iterateAnonymousTypoLines(LayoutObject* object, F lambda) {
+		auto children = object->virtualChildren();
+		if (children) {
+			for (LayoutObject* child = children->firstChild(); child; child = child->nextSibling()) {
+				if (child->isAnonymous()) {
+					iterateTypoLines(child, lambda);
+				}
+			}
+		}
+	}
+
+    void invalidateTypoLinesVisibility();
+
+    unsigned m_hasHiddenLines : 1;
+    unsigned m_shouldInvalidateTypoLinesVisibility : 1;
 };
 
 DEFINE_LAYOUT_OBJECT_TYPE_CASTS(LayoutBlock, isLayoutBlock());

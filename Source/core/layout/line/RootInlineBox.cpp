@@ -40,6 +40,7 @@ struct SameSizeAsRootInlineBox : public InlineFlowBox {
     unsigned unsignedVariable;
     void* pointers[3];
     LayoutUnit layoutVariables[6];
+    uint32_t bitfields : 1;
 };
 
 static_assert(sizeof(RootInlineBox) == sizeof(SameSizeAsRootInlineBox), "RootInlineBox should stay small");
@@ -57,6 +58,7 @@ RootInlineBox::RootInlineBox(LayoutBlockFlow& block)
     , m_lineBottomWithLeading(0)
     , m_selectionBottom(0)
     , m_paginationStrut(0)
+	, m_isVisible(true)
 {
     setIsHorizontal(block.isHorizontalWritingMode());
 }

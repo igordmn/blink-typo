@@ -498,6 +498,8 @@ int UseCounter::mapCSSPropertyIdToCSSSampleIdForHistogram(int id)
     case CSSPropertyY: return 462;
     case CSSPropertyTypoHangingPunctuation: return 0;
     case CSSPropertyTypoHyphens: return 0;
+    case CSSPropertyTypoHiddenLinesTop: return 0;
+    case CSSPropertyTypoHiddenLinesBottom: return 0;
     case CSSPropertyRx: return 463;
     case CSSPropertyRy: return 464;
     case CSSPropertyFontSizeAdjust: return 465;

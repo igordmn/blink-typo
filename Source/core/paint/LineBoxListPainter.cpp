@@ -41,6 +41,7 @@ void LineBoxListPainter::paint(LayoutBoxModelObject* layoutObject, const PaintIn
     for (InlineFlowBox* curr = m_lineBoxList.firstLineBox(); curr; curr = curr->nextLineBox()) {
         if (m_lineBoxList.lineIntersectsDirtyRect(layoutObject, curr, info, paintOffset)) {
             RootInlineBox& root = curr->root();
+            if (!root.isVisible()) continue;
             curr->paint(info, paintOffset, root.lineTop(), root.lineBottom());
         }
     }

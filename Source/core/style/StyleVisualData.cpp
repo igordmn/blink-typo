@@ -29,6 +29,8 @@ namespace blink {
 StyleVisualData::StyleVisualData()
     : hasAutoClip(true)
     , textDecoration(ComputedStyle::initialTextDecoration())
+	, typoHiddenLinesTop(ComputedStyle::initialTypoHiddenLinesTop())
+	, typoHiddenLinesBottom(ComputedStyle::initialTypoHiddenLinesBottom())
     , m_zoom(ComputedStyle::initialZoom())
 {
 }
@@ -42,6 +44,8 @@ StyleVisualData::StyleVisualData(const StyleVisualData& o)
     , clip(o.clip)
     , hasAutoClip(o.hasAutoClip)
     , textDecoration(o.textDecoration)
+    , typoHiddenLinesTop(o.typoHiddenLinesTop)
+    , typoHiddenLinesBottom(o.typoHiddenLinesBottom)
     , m_zoom(ComputedStyle::initialZoom())
 {
 }

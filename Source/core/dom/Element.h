@@ -660,6 +660,9 @@ private:
     v8::Local<v8::Object> wrapCustomElement(v8::Isolate*, v8::Local<v8::Object> creationContext);
 
     RefPtrWillBeMember<ElementData> m_elementData;
+
+public:
+    ClientRectList* typoGetLineRects();
 };
 
 DEFINE_NODE_TYPE_CASTS(Element, isElementNode());

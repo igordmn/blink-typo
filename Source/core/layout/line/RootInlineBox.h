@@ -199,6 +199,13 @@ private:
     LayoutUnit m_lineBottomWithLeading;
     LayoutUnit m_selectionBottom;
     LayoutUnit m_paginationStrut;
+
+public:
+    bool isVisible() const { return m_isVisible; }
+    void setVisible(bool isVisible) { m_isVisible = isVisible; }
+
+private:
+    unsigned m_isVisible : 1;
 };
 
 } // namespace blink

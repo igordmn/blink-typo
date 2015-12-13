@@ -1523,8 +1523,12 @@ public:
     // Typo properties
     ETypoHangingPunctuation typoHangingPunctuation() const { return static_cast<ETypoHangingPunctuation>(inherited_flags._typo_hanging_punctuation); }
     ETypoHyphens typoHyphens() const { return static_cast<ETypoHyphens>(inherited_flags._typo_hyphens); }
+    unsigned typoHiddenLinesTop() const { return visual->typoHiddenLinesTop; }
+    unsigned typoHiddenLinesBottom() const { return visual->typoHiddenLinesBottom; }
     void setTypoHangingPunctuation(ETypoHangingPunctuation value) { inherited_flags._typo_hanging_punctuation = value; }
     void setTypoHyphens(ETypoHyphens value) { inherited_flags._typo_hyphens = value; }
+    void setTypoHiddenLinesTop(unsigned value) { visual.access()->typoHiddenLinesTop = value; }
+    void setTypoHiddenLinesBottom(unsigned value) { visual.access()->typoHiddenLinesBottom = value; }
 
     // Initial values for all the properties
     static EBorderCollapse initialBorderCollapse() { return BSEPARATE; }
@@ -1709,6 +1713,8 @@ public:
     // Typo properties
     static ETypoHangingPunctuation initialTypoHangingPunctuation() { return TypoHangingPunctuationOff; }
     static ETypoHyphens initialTypoHyphens() { return TypoHyphensOff; }
+    static unsigned initialTypoHiddenLinesTop() { return 0; }
+    static unsigned initialTypoHiddenLinesBottom() { return 0; }
 private:
     void setVisitedLinkColor(const Color&);
     void setVisitedLinkBackgroundColor(const StyleColor& v) { SET_VAR(rareNonInheritedData, m_visitedLinkBackgroundColor, v); }

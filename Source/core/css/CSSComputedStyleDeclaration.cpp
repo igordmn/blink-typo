@@ -329,6 +329,8 @@ static const CSSPropertyID staticComputableProperties[] = {
     CSSPropertyY,
     CSSPropertyTypoHangingPunctuation,
     CSSPropertyTypoHyphens,
+	CSSPropertyTypoHiddenLinesTop,
+	CSSPropertyTypoHiddenLinesBottom,
     CSSPropertyR,
     CSSPropertyRx,
     CSSPropertyRy

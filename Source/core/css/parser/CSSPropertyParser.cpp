@@ -1508,6 +1508,10 @@ bool CSSPropertyParser::parseValue(CSSPropertyID unresolvedProperty, bool import
         if (id == CSSValueOff || id == CSSValueOn)
             validPrimitive = true;
         break;
+    case CSSPropertyTypoHiddenLinesTop:
+    case CSSPropertyTypoHiddenLinesBottom:
+        validPrimitive = validUnit(value, FInteger);
+    	break;
 
     default:
         return parseSVGValue(propId, important);
