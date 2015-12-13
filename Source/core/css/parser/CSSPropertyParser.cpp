@@ -1504,9 +1504,6 @@ bool CSSPropertyParser::parseValue(CSSPropertyID unresolvedProperty, bool import
         validPrimitive = false;
         break;
     case CSSPropertyTypoHangingPunctuation:
-        if (id == CSSValueOff || id == CSSValueOn)
-            validPrimitive = true;
-        break;
     case CSSPropertyTypoHyphens:
         if (id == CSSValueOff || id == CSSValueOn)
             validPrimitive = true;
